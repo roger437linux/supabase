@@ -1,0 +1,18 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+*.agents
+
+# Virtual environments
+.venv/
+
+# Arquivos de credenciais/dados sensíveis
+**/secrets.toml
+**/.env
+
+# Garantir que o .gitignore da raiz seja versionado
+!/.gitignore

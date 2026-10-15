@@ -1,0 +1,21 @@
+[project]
+name = "streamlit-00"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "roger437linu", email = "roger437linux@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "pandas>=3.0.6",
+    "supabase>=2.0.0",
+    "streamlit>=1.64.0",
+]
+
+[project.scripts]
+streamlit-00 = "streamlit_00:main"
+
+[build-system]
+requires = ["uv_build>=0.12.22,<0.13.0"]
+build-backend = "uv_build"

@@ -1,0 +1,276 @@
+1. Configure o arquivo secrets.toml
+
+Na raiz do seu projeto Streamlit, crie o diretório .streamlit e, dentro dela, o arquivo secrets.toml:
+
+meu_projeto/
+├── .streamlit/
+│   └── secrets.toml
+├── app.py
+└── requirements.txt
+
+Conteúdo de .streamlit/secrets.toml:
+
+SUPABASE_URL = "https://seu-projeto.supabase.co"
+SUPABASE_KEY = "sua-chave-do-supabase"
+
+
+2. Instale a biblioteca
+
+uv add supabase
+
+pip install supabase
+
+
+3. Consulte a tabela clientes
+
+
+import streamlit as st
+from supabase import create_client
+
+# Conexão com o Supabase usando secrets.toml
+supabase = create_client(
+    st.secrets["SUPABASE_URL"],
+    st.secrets["SUPABASE_KEY"]
+)
+
+# Equivalente a SELECT * FROM clientes
+resposta = supabase.table("clientes").select("*").execute()
+
+# Exibe os resultados
+st.title("Clientes")
+st.dataframe(resposta.data)
+
+
+4. Exemplos de outras consultas
+
+SQL	                                    Supabase com Python
+-----------------------------------------------------------------------------------------------------
+SELECT * FROM clientes	                supabase.table("clientes").select("*").execute()
+SELECT nome FROM clientes	            supabase.table("clientes").select("nome").execute()
+SELECT * FROM clientes WHERE id = 1	    supabase.table("clientes").select("*").eq("id", 1).execute()
+SELECT * FROM clientes ORDER BY nome	supabase.table("clientes").select("*").order("nome").execute()
+SELECT * FROM clientes LIMIT 10	        supabase.table("clientes").select("*").limit(10).execute()
+
+
+5. Operadores de comparação — WHERE
+
+SQL	                Supabase com Python	    Significado
+-----------------------------------------------------------
+WHERE id = 1	    .eq("id", 1)	        Igual a
+WHERE id <> 1	    .neq("id", 1)	        Diferente de
+WHERE idade > 18	.gt("idade", 18)	    Maior que
+WHERE idade < 60	.lt("idade", 60)	    Menor que
+WHERE idade >= 18	.gte("idade", 18)	    Maior ou igual
+WHERE idade <= 60	.lte("idade", 60)	    Menor ou igual
+
+
+# SELECT * FROM clientes WHERE idade >= 18;
+
+resposta = (
+    supabase.table("clientes")
+    .select("*")
+    .gte("idade", 18)
+    .execute()
+)
+
+
+2. Combinação de condições — AND
+
+SELECT *
+FROM clientes
+WHERE idade >= 18
+  AND cidade = 'São Paulo';
+
+
+resposta = (
+    supabase.table("clientes")
+    .select("*")
+    .gte("idade", 18)
+    .eq("cidade", "São Paulo")
+    .execute()
+)
+
+
+SQL	                                        Supabase com Python
+-------------------------------------------------------------------------------------
+WHERE idade > 18 AND idade < 60	            .gt("idade", 18).lt("idade", 60)
+WHERE cidade = 'Santos' AND idade >= 18	    .eq("cidade", "Santos").gte("idade", 18)
+WHERE salario >= 3000 AND salario <= 8000	.gte("salario", 3000).lte("salario", 8000)
+
+
+3. Operador OR
+
+SQL
+
+SELECT *
+FROM clientes
+WHERE cidade = 'Santos'
+   OR cidade = 'São Paulo';
+
+
+Python
+
+resposta = (
+    supabase.table("clientes")
+    .select("*")
+    .or_("cidade.eq.Santos,cidade.eq.São Paulo")
+    .execute()
+)
+
+SQL
+
+SELECT * FROM clientes
+WHERE idade < 18 OR idade >= 60;
+
+
+Python
+
+resposta = (
+    supabase.table("clientes")
+    .select("*")
+    .or_("idade.lt.18,idade.gte.60")
+    .execute()
+)
+
+
+A expressão dentro de .or_() usa a sintaxe de filtros da API do PostgREST, e não SQL puro.
+
+
+4. Pesquisa de texto — LIKE e ILIKE
+
+SQL	                        Supabase com Python	        Significado
+----------------------------------------------------------------------------------------------------
+WHERE nome LIKE 'Ana%'	    .like("nome", "Ana%")	    Começa com Ana
+WHERE nome LIKE '%Silva'	.like("nome", "%Silva")	    Termina com Silva
+WHERE nome LIKE '%Maria%'	.like("nome", "%Maria%")	Contém Maria
+WHERE nome ILIKE '%maria%'	.ilike("nome", "%maria%")	Busca sem diferenciar maiúsculas e minúsculas
+
+Python
+
+resposta = (
+    supabase.table("clientes")
+    .select("*")
+    .ilike("nome", "%maria%")
+    .execute()
+)
+
+O operador % funciona como curinga, assim como no SQL.
+
+
+5. Filtrar por vários valores — IN e NOT IN
+
+SQL
+
+SELECT * FROM clientes
+WHERE cidade IN ('Santos', 'Campinas', 'São Paulo');
+
+
+Python
+
+resposta = (
+    supabase.table("clientes")
+    .select("*")
+    .in_("cidade", ["Santos", "Campinas", "São Paulo"])
+    .execute()
+)
+
+
+Para excluir determinadas cidades, use .not_.in_():
+
+SQL
+
+SELECT * FROM clientes
+WHERE cidade NOT IN ('Santos', 'Campinas');
+
+
+Python
+
+resposta = (
+    supabase.table("clientes")
+    .select("*")
+    .not_.in_("cidade", ["Santos", "Campinas"])
+    .execute()
+)
+
+
+6. Valores nulos — IS NULL e IS NOT NULL
+
+
+SQL
+
+SELECT * FROM clientes
+WHERE cidade IS NULL;
+
+
+Python
+
+resposta = (
+    supabase.table("clientes")
+    .select("*")
+    .is_("cidade", "null")
+    .execute()
+)
+
+Para valores não nulos:
+
+SQL
+
+SELECT * FROM clientes
+WHERE cidade IS NOT NULL;
+
+
+Python
+
+resposta = (
+    supabase.table("clientes")
+    .select("*")
+    .not_.is_("cidade", "null")
+    .execute()
+)
+
+
+7. Mais operadores úteis
+
+SQL	                                    Supabase com Python
+--------------------------------------------------------------------------
+WHERE ativo = TRUE	                    .eq("ativo", True)
+WHERE ativo = FALSE	                    .eq("ativo", False)
+WHERE idade BETWEEN 18 AND 30	        .gte("idade", 18).lte("idade", 30)
+WHERE nome LIKE 'A%'	                .like("nome", "A%")
+WHERE cidade IS DISTINCT FROM 'Santos'	.not_.eq("cidade", "Santos")*
+
+* Atenção: .not_.eq() não é equivalente em todos os casos a IS DISTINCT FROM, 
+especialmente quando há valores NULL. Para reproduzir exatamente a semântica SQL, 
+considere o comportamento dos nulos.
+
+
+8. Exemplo completo com Streamlit
+
+Exibir os clientes com idade entre 18 e 30 anos, residentes em São Paulo:
+
+import streamlit as st
+from supabase import create_client
+
+supabase = create_client(
+    st.secrets["SUPABASE_URL"],
+    st.secrets["SUPABASE_KEY"]
+)
+
+st.title("Consulta de clientes")
+
+resposta = (
+    supabase.table("clientes")
+    .select("*")
+    .gte("idade", 18)
+    .lte("idade", 30)
+    .eq("cidade", "São Paulo")
+    .order("nome")
+    .execute()
+)
+
+if resposta.data:
+    st.dataframe(resposta.data)
+else:
+    st.info("Nenhum cliente encontrado.")
+
+
