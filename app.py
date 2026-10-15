@@ -8,13 +8,7 @@ st.write("Teste de conexão com o Supabase")
 if st.button("Testar conexão"):
     try:
         conn = conectar()
-        st.success("✅ Conexão com a API do Supabase realizada com sucesso!")      
-
-        # SELECT nome, bairro, fone
-        # FROM clientes
-        # WHERE id_cliente <= 100 AND bairro = 'Centro'
-        # ORDER BY nome
-        # LIMIT 5
+        st.success("✅ Conexão com a API do Supabase realizada com sucesso!")       
 
         resposta = (
             conn.table("clientes")
@@ -29,7 +23,6 @@ if st.button("Testar conexão"):
         # Exibe os resultados
         st.title("Clientes")
         st.dataframe(resposta.data)
-
 
     except Exception as e:
         st.error("❌ Não foi possível conectar à API do Supabase.")

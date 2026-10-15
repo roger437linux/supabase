@@ -1,4 +1,4 @@
-# Hamburgueria — Streamlit + Supabase
+# 🍔 Streamlit + Supabase
 
 ## Configuração local
 
