@@ -1,6 +1,6 @@
 import streamlit as st
 
-from src.streamlit_00.db import conectar
+from streamlit_00.db import conectar
 
 st.title("🍔 Hamburgueria")
 st.write("Teste de conexão com o Supabase")

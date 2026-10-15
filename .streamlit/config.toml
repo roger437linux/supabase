@@ -11,5 +11,3 @@ toolbarMode = "minimal"
 
 [server]
 runOnSave = true
-# port = 8502
-port = 7777
